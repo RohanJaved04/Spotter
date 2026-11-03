@@ -1,19 +1,13 @@
 # Spotter — Weather-Aware Truck Routing & Fleet Cockpit
 
-A full-stack freight navigation platform built with **Django REST Framework** and **React + Leaflet** that assists truck drivers and fleet dispatchers in choosing the safest route based on real-time weather forecasts along the route corridor, cargo weight, and travel time.
-
-![Spotter Fleet Radar](https://img.shields.io/badge/Spotter-Fleet%20Radar-0284c7?style=for-the-badge&logo=cargo)
-![Django](https://img.shields.io/badge/Django-6.1-092E20?style=for-the-badge&logo=django)
-![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
-![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?style=for-the-badge&logo=leaflet)
-![Open-Meteo](https://img.shields.io/badge/Open--Meteo-Free%20Weather%20API-38bdf8?style=for-the-badge)
+A full-stack freight navigation platform built with **Django REST Framework** and **React + Leaflet** that assists truck drivers and fleet dispatchers in comparing route candidates using weather forecasts along the route corridor, cargo weight, and travel time.
 
 ---
 
 ## 🌟 Key Features
 
-1. **Guaranteed 3 Route Alternatives**:
-   - Integrates with OSRM (Open Source Routing Machine) to retrieve and evaluate 3 distinct highway corridors between any origin and destination.
+1. **Three Candidate Routes**:
+   - Requests routes from the public OSRM service, tries waypoint detours when needed, and can synthesize variants of an existing route. Three displayed candidates are not always three independently validated road routes.
 2. **Dynamic Checkpoint Weather Sampling (10 / 25 / 50 Miles)**:
    - Samples weather every **10, 25, or 50 miles** along each route using the truck's exact estimated arrival time (**ETA**) at each checkpoint ($departure\_time + cumulative\_duration$).
    - Integrates with **Open-Meteo Free Forecast API** (no API key required) for hourly wind speed (mph), precipitation rate (in/hr), snowfall rate (in/hr), and temperature.
@@ -80,45 +74,45 @@ graph TD
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Python 3.10+
-- Node.js 18+ and npm
+- Python 3.12+ for the declared Django 6.1 dependency
+- Node.js and npm compatible with the frontend lockfile
+- Network access to the public OSRM and Open-Meteo APIs for route and weather requests
 
-### 1. Backend Setup
-```bash
-# Navigate to project root
-cd d:/Codes/Spotter
+### Backend
 
-# Activate Python virtual environment
-.\venv\Scripts\activate   # Windows
-# source venv/bin/activate  # macOS / Linux
+From the repository root:
 
-# Navigate to backend directory
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python -m pip install -r backend/requirements.txt
 cd backend
-
-# Apply database migrations
-python manage.py migrate
-
-# Run backend test suite (8 tests)
-python manage.py test
-
-# Start the Django development server
-python manage.py runserver 127.0.0.1:8000
+..\.venv\Scripts\python manage.py migrate
+..\.venv\Scripts\python manage.py test
+..\.venv\Scripts\python manage.py runserver 127.0.0.1:8000
 ```
-Backend API will be running at `http://127.0.0.1:8000/`.
 
-### 2. Frontend Setup
-In a new terminal window:
-```bash
-# Navigate to frontend directory
-cd d:/Codes/Spotter/frontend
+On macOS or Linux, activate `.venv` and use `python` in place of the Windows virtual environment commands. The local API listens at `http://127.0.0.1:8000/`.
 
-# Install dependencies
-npm install
+### Frontend
 
-# Start Vite development server
+In another terminal, from the repository root:
+
+```powershell
+cd frontend
+npm ci
+npm run lint
+npm run build
 npm run dev
 ```
-Frontend cockpit will be running at `http://localhost:3000/`.
+
+The Vite development server uses port 3000 and proxies `/api` to the local Django server.
+
+### Current limitations
+
+- The routing backend uses the public OSRM service. Availability and route quality depend on that service. When it returns too few routes, the code can synthesize visual variants; do not treat those as verified alternate roads.
+- The risk categories are application rules, not official driving guidance. Check current weather, road closures, regulations, and vehicle constraints independently.
+- The current Django settings include an embedded fallback signing secret, debug mode, permissive hosts, and permissive CORS. They are suitable only for a local demonstration. The deployment guide is historical and must not be followed for a public launch until these settings and HTTPS handling are corrected.
+- No live public deployment or end-to-end route reliability is verified by the repository test suite.
 
 ---
 
